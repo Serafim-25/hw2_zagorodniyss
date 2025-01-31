@@ -1,4 +1,4 @@
-scaler_instanceimport pandas as pd  # Для работы с данными в таблицах (DataFrame).
+import pandas as pd  # Для работы с данными в таблицах (DataFrame).
 from sklearn.preprocessing import StandardScaler  # Для стандартизации признаков (среднее = 0, отклонение = 1).
 
 
