@@ -18,7 +18,8 @@ def main():
         description="Train a logistic regression model")
 
     # Добавляем аргумент для указания типа модели
-    parser.add_argument("--model-type", type=str, default="model_1", help="Type of model to train")
+    parser.add_argument("--model-type", type=str,
+        default="model_1", help="Type of model to train")
 
     # Разбираем аргументы командной строки
     args = parser.parse_args()
@@ -70,7 +71,7 @@ def main():
 
         # Логируем метрику точности в MLflow
         mlflow.log_metric("accuracy", accuracy)
-         
+
         # Логируем метрику точности в задаче ClearML
         if task:
             task.logger.report_scalar(
