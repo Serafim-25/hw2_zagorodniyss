@@ -1,12 +1,14 @@
 import os  # Импортируем модуль для работы с операционной системой
-import pandas as pd  # Импортируем pandas для работы с данными в формате DataFrame
+import pandas as pd  # Импортируем pandas для работы 
+                     # с данными в формате DataFrame
 from sklearn.datasets import (
     load_iris,
 )  # Импортируем функцию для загрузки набора данных iris_data из sklearn
 
 
 def download_data(output_path):
-    # Функция для загрузки набора данных iris_data и сохранения его в формате CSV
+    # Функция для загрузки набора данных 
+    # iris_data и сохранения его в формате CSV
     # output_path — это путь, по которому будет сохранен CSV файл
 
     # Загружаем набор данных iris_data с помощью sklearn
