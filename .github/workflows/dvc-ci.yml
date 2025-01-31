@@ -1,0 +1,30 @@
+name: Lint code with flake8
+
+on:
+  push:
+    branches:
+      - main  # Действие будет срабатывать только при push в ветку main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest  # Выбираем ОС для выполнения задачи
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2  # Действие для клонирования репозитория
+
+    - name: Set up Python
+      uses: actions/setup-python@v2  # Устанавливаем Python
+
+      with:
+        python-version: '3.x'  # Укажите нужную версию Python
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8  # Устанавливаем flake8
+
+    - name: Run flake8
+      run: |
+        flake8 .  # Запускаем flake8 на всех Python файлах в репозитории
+
