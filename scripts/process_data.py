@@ -21,7 +21,8 @@ def scale_features(data):
     # Выбираем все колонки, кроме последней (target)
     scaling_columns = data.columns[:-1]
     # Стандартизация данных
-    data[scaling_columns] = scaler_instance.fit_transform(data[scaling_columns])
+    data[scaling_columns] = scaler_instance.fit_transform(
+        data[scaling_columns])
     return data
 
 
@@ -30,6 +31,7 @@ def rename_target_column(data):
     # для дальнейшего использования в модели
     data = data.rename(columns={'species': 'target'})
     return data
+
 
 def export_data(data, output_path):
     # Сохраняет обработанные данные в новый CSV файл по указанному пути
