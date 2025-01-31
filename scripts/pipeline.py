@@ -77,8 +77,8 @@ def train_model_1():
             # Используем subprocess для выполнения скрипта "train.py",
             # передавая параметр "--model-type" для выбора модели
             subprocess.run(
-                ["python", "scripts/train.py", 
-                "--model-type", "model_1"], check=True
+                ["python", "scripts/train.py",
+                 "--model-type", "model_1"], check=True
             )
 
         else:
@@ -112,7 +112,7 @@ def train_model_2():
             # Инициализируем новую задачу в проекте "my_mlops_project"
             # для обучения второй модели
             new_task = Task.init(
-                project_name="my_mlops_project", 
+                project_name="my_mlops_project",
                 task_name="train_with_clearml_2"
             )
 
@@ -127,8 +127,8 @@ def train_model_2():
             # Используем subprocess для выполнения скрипта "train.py",
             # передавая параметр "--model-type" для выбора второй модели
             subprocess.run(
-                ["python", "scripts/train.py", "--model-type", 
-                "model_2"], check=True
+                ["python", "scripts/train.py", "--model-type",
+                 "model_2"], check=True
             )
 
         else:
@@ -166,7 +166,7 @@ def dvc_push():
 
 # Декоратор PipelineDecorator для определения пайплайна 'mlops_pipeline'.
 # Указываем название пайплайна, проект и версию, чтобы
-#управлять различными этапами работы с ClearML.
+# управлять различными этапами работы с ClearML.
 @PipelineDecorator.pipeline(
     name="mlops_pipeline", project="my_mlops_project", version="0.1"
 )
@@ -174,8 +174,8 @@ def mlops_pipeline_logic():
     # Шаги пайплайна, который включает в себя несколько
     # этапов, включая работу с DVC и обработку данных.
     dvc_pull()  # Загружаем данные с помощью DVC (pull).
-    download_data()  # Скачиваем необходимые данные с
-                    # использованием скрипта download.py.
+    # Скачиваем необходимые данные с использованием скрипта download.py.
+    download_data()
     process_data()  # Обрабатываем данные с помощью скрипта process_data.py.
     train_model_1()  # Обучаем первую модель.
     train_model_2()  # Обучаем вторую модель.
