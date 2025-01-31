@@ -18,9 +18,9 @@ def main():
         description="Train a logistic regression model")
 
     # Добавляем аргумент для указания типа модели
-    parser.add_argument("--model-type", 
+    parser.add_argument("--model-type",
                         type=str,
-                        default="model_1", 
+                        default="model_1",
                         help="Type of model to train")
 
     # Разбираем аргументы командной строки
