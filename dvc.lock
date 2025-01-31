@@ -1,0 +1,25 @@
+schema: '2.0'
+stages:
+  download_data:
+    cmd: python scripts/download.py
+    outs:
+    - path: data/iris_dataset.csv
+      hash: md5
+      md5: 724664c7c9b6bd4a8220680b381e6aea
+      size: 2929
+  process_data:
+    cmd: python scripts/process_data.py
+    deps:
+    - path: data/iris_dataset.csv
+      hash: md5
+      md5: 724664c7c9b6bd4a8220680b381e6aea
+      size: 2929
+    - path: scripts/process_data.py
+      hash: md5
+      md5: b306a01bd44e47483ddd596e58b3277e
+      size: 1225
+    outs:
+    - path: data/proc_iris_dataset.csv
+      hash: md5
+      md5: 5a95aae087b991a3197c8cade7479177
+      size: 12137
