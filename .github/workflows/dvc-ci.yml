@@ -1,81 +1,31 @@
-name: DVC CI  # Название процесса CI для DVC (Data Version Control)
+name: Lint Python code with flake8
 
 on:
   push:
     branches:
-      - main  # Запуск этого workflow при push в ветку 'main' (или другую ветку для продакшн)
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  dvc-setup-and-push:
-    runs-on: ubuntu-latest  # Указываем, что jobs будет выполняться на последней версии Ubuntu
+  flake8:
+    runs-on: ubuntu-latest
 
     steps:
-      # Шаг 1: Клонируем репозиторий
-      - name: Checkout code
-        uses: actions/checkout@v3  # Используем action для клонирования репозитория
+      - name: Check out code
+        uses: actions/checkout@v3
 
-      # Шаг 2: Настроим Python
       - name: Set up Python
-        uses: actions/setup-python@v4  # Используем action для настройки Python
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # Устанавливаем Python версии 3.9
+          python-version: '3.9'
 
-      # Шаг 3: Устанавливаем зависимости из файла requirements.txt
-      - name: Install Dependencies
-        run: pip install -r requirements.txt  # Установка зависимостей Python
-
-      # Шаг 4: Устанавливаем DVC (Data Version Control)
-      - name: Install DVC
-        run: pip install dvc  # Установка DVC для управления данными
-
-      # Шаг 5: Устанавливаем дополнительный модуль для работы с S3
-      - name: Install DVC
-        run: pip install dvc-gs  # Устанавливаем поддержку работы с хранилищем S3
-
-
-      - name: Configure Google Cloud Credentials
+      - name: Install dependencies
         run: |
-          echo "${{ secrets.GOOGLE_CLOUD_KEY }}" > gcloud-key.json
-          export GOOGLE_APPLICATION_CREDENTIALS=gcloud-key.json
-        shell: bash
+          python -m pip install --upgrade pip
+          pip install flake8
 
-
-
-      # Шаг 6: Настройка удаленного хранилища DVC
-      - name: Configure DVC Remote
+      - name: Run flake8
         run: |
-          dvc remote add -d myremote gs://my-dvc-bucket  # Google Cloud Storage
-          dvc remote modify myremote credentialpath gcloud-key.json
-
-
-      # Шаг 8: Скачиваем данные, связанные с проектом
-      - name: DVC Pull Data
-        run: dvc pull  # Загружаем все зависимости из удаленного хранилища
-
-      # Шаг 9: Запускаем DVC пайплайн, чтобы воспроизвести этапы обработки данных
-      - name: Run DVC Pipeline
-        run: dvc repro  # Запускаем воспроизведение пайплайна DVC, чтобы обновить все файлы данных
-
-      # Шаг 10: Отправляем обновленные данные в удаленное хранилище
-      - name: DVC Push Data
-        run: dvc push  # Отправляем изменения в удаленное хранилище
-
-      # Шаг 11: Добавляем и коммитим изменения в DVC файлы (например, .dvc и dvc.lock)
-      - name: Git add and commit DVC files
-        run: |
-          git config user.email "github-actions@example.com"
-          git config user.name "GitHub Actions"
-          git add .dvc dvc.lock
-
-          if [[ $(git status --porcelain | grep -c "dvc.lock\|.dvc") -ne 0 ]]; then
-            git commit -m "Update DVC data"
-          else
-            echo "No changes to commit"
-          fi
-
-      # Шаг 12: Отправляем изменения обратно в репозиторий на GitHub
-      - name: Git push DVC Config
-        uses: ad-m/github-push-action@master  # Используем сторонний action для пуша изменений
-        with:
-          github_token: ${{ secrets.ACTIONS_PAT }}  # Токен доступа для GitHub Actions
-          branch: ${{ github.ref }}  # Указываем ветку, в которую будет отправлен push
+          flake8 .
