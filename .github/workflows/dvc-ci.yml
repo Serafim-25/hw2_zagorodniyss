@@ -1,31 +1,78 @@
-name: Lint Python code with flake8
+name: DVC CI  # Название процесса CI для DVC (Data Version Control)
 
 on:
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
+      - main  # Запуск этого workflow при push в ветку 'main' (или другую ветку для продакшн)
 
 jobs:
-  flake8:
-    runs-on: ubuntu-latest
+  dvc-setup-and-push:
+    runs-on: ubuntu-latest  # Указываем, что jobs будет выполняться на последней версии Ubuntu
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v3
+      # Шаг 1: Клонируем репозиторий
+      - name: Checkout code
+        uses: actions/checkout@v3  # Используем action для клонирования репозитория
 
+      # Шаг 2: Настроим Python
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v4  # Используем action для настройки Python
         with:
-          python-version: '3.9'
+          python-version: '3.9'  # Устанавливаем Python версии 3.9
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install flake8
+      # Шаг 3: Устанавливаем зависимости из файла requirements.txt
+      - name: Install Dependencies
+        run: pip install -r requirements.txt  # Установка зависимостей Python
 
-      - name: Run flake8
+      # Шаг 4: Устанавливаем DVC (Data Version Control)
+      - name: Install DVC
+        run: pip install dvc  # Установка DVC для управления данными
+
+      # Шаг 5: Устанавливаем дополнительный модуль для работы с S3
+      - name: Install DVC S3
+        run: pip install dvc-s3  # Устанавливаем поддержку работы с хранилищем S3
+
+      # Шаг 6: Настройка удаленного хранилища DVC
+      - name: Configure DVC Remote
         run: |
-          flake8 .
+           dvc remote add -d myremote s3://my-dvc-backet  # Добавляем удаленное хранилище (например, S3)
+
+      # Шаг 7: Настроим доступ к удаленному хранилищу, используя секреты
+      - name: Configure DVC Remote
+        run: |
+           dvc remote modify myremote access_key_id ${{ secrets.YANDEX_ACCESS_KEY_ID }}  # Устанавливаем access_key_id для S3
+           dvc remote modify myremote secret_access_key ${{ secrets.YANDEX_SECRET_ACCESS_KEY }}  # Устанавливаем secret_access_key для S3
+           dvc remote modify myremote endpointurl https://storage.yandexcloud.net  # Устанавливаем endpoint для Яндекс Облака
+
+      # Шаг 8: Скачиваем данные, связанные с проектом
+      - name: DVC Pull Data
+        run: dvc pull  # Загружаем все зависимости из удаленного хранилища
+
+      # Шаг 9: Запускаем DVC пайплайн, чтобы воспроизвести этапы обработки данных
+      - name: Run DVC Pipeline
+        run: dvc repro  # Запускаем воспроизведение пайплайна DVC, чтобы обновить все файлы данных
+
+      # Шаг 10: Отправляем обновленные данные в удаленное хранилище
+      - name: DVC Push Data
+        run: dvc push  # Отправляем изменения в удаленное хранилище
+
+      # Шаг 11: Добавляем и коммитим изменения в DVC файлы (например, .dvc и dvc.lock)
+      - name: Git add and commit DVC files
+        run: |
+          git config user.email "github-actions@example.com"  # Настроим пользователя для коммитов
+          git config user.name "GitHub Actions"  # Настроим имя пользователя для коммитов
+          git add .dvc dvc.lock  # Добавляем файлы, связанные с DVC, в staging
+
+          # Проверяем, были ли изменения в DVC файлах, если были — коммитим, если нет — выводим сообщение
+          if [[ $(git status --porcelain | grep -c "dvc.lock\|.dvc") -ne 0 ]]; then
+            git commit -m "Update DVC data"  # Если изменения есть, коммитим с сообщением
+          else
+            echo "No changes to commit"  # Если изменений нет, выводим сообщение
+          fi
+
+      # Шаг 12: Отправляем изменения обратно в репозиторий на GitHub
+      - name: Git push DVC Config
+        uses: ad-m/github-push-action@master  # Используем сторонний action для пуша изменений
+        with:
+          github_token: ${{ secrets.ACTIONS_PAT }}  # Токен доступа для GitHub Actions
+          branch: ${{ github.ref }}  # Указываем ветку, в которую будет отправлен push
